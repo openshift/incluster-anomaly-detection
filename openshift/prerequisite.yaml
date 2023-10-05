@@ -1,0 +1,202 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: osa-anomaly-detection
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: osa-in-cluster-thanos-querier
+  namespace: osa-anomaly-detection
+automountServiceAccountToken: true
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: osa-crd-sa-user
+  namespace: osa-anomaly-detection
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: osa-in-cluster-thanos-querier
+subjects:
+  - kind: ServiceAccount
+    name: osa-in-cluster-thanos-querier
+    namespace: osa-anomaly-detection
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-monitoring-view
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: osa-in-cluster-thanos-querier-token
+  namespace: osa-anomaly-detection
+  annotations:
+    kubernetes.io/service-account.name: osa-in-cluster-thanos-querier
+type: kubernetes.io/service-account-token
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: osa-crd-admin
+  namespace: osa-anomaly-detection
+rules:
+  - verbs:
+      - create
+      - update
+      - list
+      - view
+      - delete
+    apiGroups:
+      - backend.anomaly.io
+    resources:
+      - anomalydata
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: osa-crd-user
+  namespace: osa-anomaly-detection
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: osa-crd-admin-sa-rolebinding
+  namespace: osa-anomaly-detection
+subjects:
+  - kind: ServiceAccount
+    name: osa-crd-sa-user
+    namespace: osa-anomaly-detection
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: osa-crd-admin
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: osa-anomaly-config
+  namespace: osa-anomaly-detection
+data:
+  anomaly_config.yaml: |-
+    kube_configmap_info:
+      method: percentage_change
+      query: count(kube_configmap_info)
+      step: 2  # minutes
+      percentage_change: 60  # percentage
+      period_range: 60  # minutes
+      have_multi_result_data: False
+    etcd_object_namespaces:
+      method: min_max
+      query: max(apiserver_storage_objects{resource=~"namespaces"}) by (resource)
+      min: 60
+      max: 100
+    etcd_object_secrets_config_maps:
+      method: percentage_change
+      query: max(apiserver_storage_objects{resource=~"secrets|configmaps"}) by (resource)
+      step: 2  # minutes
+      percentage_change: 60  # percentage
+      period_range: 60  # minutes
+      have_multi_result_data: True
+---
+kind: CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1
+metadata:
+  name: anomalydata.backend.anomaly.io
+spec:
+  group: backend.anomaly.io
+  names:
+    plural: anomalydata
+    singular: anomalydata
+    kind: AnomalyData
+    listKind: AnomalyDataList
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: AnomalyData is the Schema for the anomalydata API
+          type: object
+          properties:
+            apiVersion:
+              description: >-
+                APIVersion defines the versioned schema of this representation
+                of an object. Servers should convert recognized schemas to the
+                latest internal value, and may reject unrecognized values. More
+                info:
+                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+              type: string
+            kind:
+              description: >-
+                Kind is a string value representing the REST resource this
+                object represents. Servers may infer this from the endpoint the
+                client submits requests to. Cannot be updated. In CamelCase.
+                More info:
+                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: AnomalyDataSpec defines the desired state of AnomalyData
+              type: object
+              properties:
+                anomalyname:
+                  type: string
+                config:
+                  description: >-
+                    AnomalyConfig defines the properties set while declaring
+                    anomaly defination
+                  type: object
+                  properties:
+                    havemultiresultdata:
+                      type: boolean
+                    max:
+                      type: integer
+                      format: int64
+                    min:
+                      type: integer
+                      format: int64
+                    percentagechange:
+                      type: number
+                    periodrange:
+                      type: number
+                    query:
+                      type: string
+                    step:
+                      type: integer
+                method:
+                  type: string
+                metricdata:
+                  description: MetricData defined property related to metric
+                  type: object
+                  properties:
+                    datapoints:
+                      type: string
+                    groupeddata:
+                      type: string
+                    latestvalue:
+                      type: number
+                    percentagechange:
+                      type: number
+                    prevdatameanvalue:
+                      type: number
+                    timestamp:
+                      type: integer
+                      format: int64
+            status:
+              description: AnomalyDataStatus defines the observed state of AnomalyData
+              type: object
+status:
+  acceptedNames:
+    plural: anomalydata
+    singular: anomalydata
+    kind: AnomalyData
+    listKind: AnomalyDataList
+  storedVersions:
+    - v1alpha1
+---

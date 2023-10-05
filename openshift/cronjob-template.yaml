@@ -1,0 +1,118 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: anomaly-detection-template
+objects:
+  - apiVersion: batch/v1
+    kind: CronJob
+    metadata:
+      name: anomaly-detection
+      namespace: osa-anomaly-detection
+    spec:
+      # Run every 2 min
+      schedule: "*/2 * * * *"
+      startingDeadlineSeconds: 200
+      successfulJobsHistoryLimit: 10
+      failedJobsHistoryLimit: 10
+      concurrencyPolicy: "Forbid"
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              serviceAccountName: osa-crd-sa-user
+              containers:
+                - name: anomaly-detection
+                  image: "${IMAGE_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                  command:
+                    - python
+                  args:
+                    - "-m"
+                    - "src.driver"
+                    - "-aq"
+                    - ${ANOMALY_QUERIES}
+                  env:
+                    - name: LOG_LEVEL
+                      value: ${LOG_LEVEL}
+                    - name: ANOMALY_CONFIG_FILE
+                      value: /etc/config/anomaly_config.yaml
+                    - name: ACCESS_TOKEN
+                      valueFrom:
+                        secretKeyRef:
+                          name: osa-in-cluster-thanos-querier-token
+                          key: token
+                  resources:
+                    requests:
+                      cpu: ${CPU_REQUEST}
+                      memory: ${MEMORY_REQUEST}
+                    limits:
+                      cpu: ${CPU_LIMIT}
+                      memory: ${MEMORY_LIMIT}
+                  volumeMounts:
+                    - name: config-volume
+                      mountPath: /etc/config
+                  imagePullPolicy: Always
+              volumes:
+                - name: config-volume
+                  configMap:
+                    name: osa-anomaly-config
+              restartPolicy: Never
+              terminationGracePeriodSeconds: 30
+              dnsPolicy: ClusterFirst
+              securityContext: { }
+              schedulerName: default-scheduler
+          backoffLimit: 3
+
+parameters:
+  - description: "Job logging level (see: https://docs.python.org/3/library/logging.html#levels)"
+    displayName: "Logging level"
+    required: false
+    name: LOG_LEVEL
+    value: "DEBUG"
+
+  - description: "Anomaly queries, list of comma separated string."
+    displayName: "Anomaly Queries"
+    required: false
+    name: ANOMALY_QUERIES
+    value: ""
+
+  - description: "Image registry"
+    displayName: "Image registry"
+    required: true
+    name: IMAGE_REGISTRY
+    value: "quay.io"
+
+  - description: "Image name"
+    displayName: "Image name"
+    required: true
+    name: IMAGE_NAME
+    value: "openshiftanalytics/incluster-anomaly"
+
+  - description: "Image tag"
+    displayName: "Image tag"
+    required: true
+    name: IMAGE_TAG
+    value: "v1"
+
+  - description: "CPU request"
+    displayName: "CPU request"
+    required: true
+    name: CPU_REQUEST
+    value: "128m"
+
+  - description: "CPU limit"
+    displayName: "CPU limit"
+    required: true
+    name: CPU_LIMIT
+    value: "256m"
+
+  - description: "Memory request"
+    displayName: "Memory request"
+    required: true
+    name: MEMORY_REQUEST
+    value: "256Mi"
+
+  - description: "Memory limit"
+    displayName: "Memory limit"
+    required: true
+    name: MEMORY_LIMIT
+    value: "512Mi"
