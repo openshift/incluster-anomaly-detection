@@ -1,0 +1,30 @@
+{
+    "status": "success",
+    "data": {
+        "resultType": "matrix",
+        "result": [
+            {
+                "metric": {
+                    "resource": "configmaps"
+                },
+                "values": [
+                    [
+                        1690360860,
+                        "514"
+                    ]
+                ]
+            },
+            {
+                "metric": {
+                    "resource": "secrets"
+                },
+                "values": [
+                    [
+                        1690360860,
+                        "949"
+                    ]
+                ]
+            }
+        ]
+    }
+}
