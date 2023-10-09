@@ -9,21 +9,7 @@ jobs:
   pylint-check:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@main
-      - name: Set up Python 3.9
-        uses: actions/setup-python@main
-        with:
-          # Semantic version range syntax or exact version of a Python version
-          python-version: '3.9'
-          # Optional - x64 or x86 architecture, defaults to x64
-          architecture: 'x64'
-      # You can test your matrix by printing the current Python version
-      - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
-      - name: Install pipenv
-        run: pip install pipenv
-      - name: Install dependancies
-        run: pipenv install --dev
+      - name: Setup Environment
+        uses: ./.github/actions/setup-pipenv
       - name: Check lint issues
         run: pipenv run pylint src tests
