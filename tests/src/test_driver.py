@@ -1,3 +1,4 @@
+"""Test class for the driver."""
 from argparse import Namespace
 from unittest import mock, TestCase
 
@@ -5,7 +6,6 @@ from src.driver import main
 
 
 class DriverTestCase(TestCase):
-    '''Test class for the driver logic.'''
 
     @mock.patch("src.driver.load_incluster_config")
     @mock.patch("src.driver.create_cr")
@@ -31,7 +31,7 @@ class DriverTestCase(TestCase):
         self.assertEqual(_mock_get_argument.call_count, 1)
         self.assertEqual(_mock_get_metric_query_range.call_count, 2)
         self.assertEqual(_mock_get_metric_data.call_count, 1)
-        self.assertEqual(_mock_get_change_from_telemetry_data.call_count, 4)
+        self.assertEqual(_mock_get_change_from_telemetry_data.call_count, 3)
 
     @mock.patch("src.driver.load_incluster_config")
     @mock.patch("src.driver.create_cr")

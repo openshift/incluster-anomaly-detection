@@ -1,5 +1,5 @@
+"""Driver for in-cluster metric data access and detect basic anomaly."""
 import datetime
-import json
 import json
 import sys
 
@@ -21,10 +21,11 @@ daiquiri.setup(level=DAIQUIRI_LOG_LEVEL)
 _logger = daiquiri.getLogger(__name__)
 
 
-def __get_telemetry_data(config: dict) :
+def __get_telemetry_data(config: dict):
+    """Get telemetry data points."""
     if config["method"] == AnomalyMethod.PERCENTAGE_CHANGE:
         current_time = datetime.datetime.now()
-        abc = 0
+
         end_time = current_time.replace(microsecond=0).replace(second=0)
 
         start_time = end_time - datetime.timedelta(minutes=config["period_range"])
@@ -42,7 +43,7 @@ def __get_telemetry_data(config: dict) :
 
 
 def main():
-    '''Start of the main logic.'''
+    """Start of the main logic."""
     _logger.info("Inside main method")
     # get arguments
     args = get_arguments(sys.argv[1:])
@@ -51,7 +52,7 @@ def main():
 
     try:
         anomaly_lst = []
-        for key, config in query_configs.items() :
+        for key, config in query_configs.items():
             _logger.info(f"query_name: {key}, configuration: {config}")
 
             # get telemetry data points
