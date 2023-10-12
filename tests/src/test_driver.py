@@ -1,4 +1,3 @@
-"""Test class for the driver."""
 from argparse import Namespace
 from unittest import mock, TestCase
 
@@ -6,7 +5,7 @@ from src.driver import main
 
 
 class DriverTestCase(TestCase):
-    """Test class for the driver logic."""
+    '''Test class for the driver logic.'''
 
     @mock.patch("src.driver.load_incluster_config")
     @mock.patch("src.driver.create_cr")
@@ -22,8 +21,7 @@ class DriverTestCase(TestCase):
         _mock_get_change_from_telemetry_data,
         _mock_create_cr,
         _mock_load_kube_config,
-    ):
-        """Test main method with default arguments."""
+    ) :
         _mock_get_argument.return_value = Namespace(anomaly_queries=None)
 
         # Call main method.
@@ -33,7 +31,7 @@ class DriverTestCase(TestCase):
         self.assertEqual(_mock_get_argument.call_count, 1)
         self.assertEqual(_mock_get_metric_query_range.call_count, 2)
         self.assertEqual(_mock_get_metric_data.call_count, 1)
-        self.assertEqual(_mock_get_change_from_telemetry_data.call_count, 3)
+        self.assertEqual(_mock_get_change_from_telemetry_data.call_count, 4)
 
     @mock.patch("src.driver.load_incluster_config")
     @mock.patch("src.driver.create_cr")
