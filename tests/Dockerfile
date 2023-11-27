@@ -13,9 +13,6 @@ ENV PYTHON_VERSION=3.9 \
     LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8
 
-RUN pip install --upgrade --no-cache-dir pip && \
-    pip install --upgrade --no-cache-dir pipenv
-
 # Install Python 3.9
 RUN microdnf update -y && \
     microdnf install -y python39 && \
