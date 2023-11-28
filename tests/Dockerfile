@@ -23,6 +23,9 @@ RUN pip3.9 install --no-cache-dir --upgrade pip && \
     pip3.9 install --no-cache-dir --upgrade pipenv && \
     pip3.9 install --no-cache-dir 'setuptools>=65.5.1'
 
+# create python venv where everything will be executed
+RUN python -m venv myenv
+
 # Copy files to workdir
 WORKDIR /opt/app-root/
 COPY ./Pipfile* /opt/app-root/
