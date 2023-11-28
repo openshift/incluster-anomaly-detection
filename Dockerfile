@@ -30,3 +30,6 @@ COPY ./Pipfile* /opt/app-root/
 RUN PIPENV_VENV_IN_PROJECT=1 PIPENV_IGNORE_VIRTUALENVS=1 pipenv install --system --deploy --ignore-pipfile
 
 COPY src /opt/app-root/src
+
+# drop root privilege
+USER 1001

@@ -32,3 +32,6 @@ RUN PIPENV_VENV_IN_PROJECT=1 PIPENV_IGNORE_VIRTUALENVS=1 pipenv install --dev --
 
 COPY /src /opt/app-root/src
 COPY /tests /opt/app-root/tests
+
+# drop root privilege
+USER 1001
