@@ -21,7 +21,7 @@ RUN microdnf update -y && \
 # Install pipenv and setuptools
 RUN pip3.9 install --no-cache-dir --upgrade pip && \
     pip3.9 install --no-cache-dir --upgrade pipenv && \
-    pip3.9 install --no-cache-dir 'setuptools>=65.5.1' \
+    pip3.9 install --no-cache-dir 'setuptools>=65.5.1'
 
 # Copy files to workdir
 WORKDIR /opt/app-root/
