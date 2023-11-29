@@ -1,40 +1,23 @@
-# Use the UBI minimal base image
-FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
+FROM registry.access.redhat.com/ubi8/python-39
 
 LABEL name="incluster-anomaly-ci" \
       description="Anomaly detection CI docker file" \
       target-file="Dockerfile"
 
-# Set environment variables
-ENV PYTHON_VERSION=3.9 \
-    PATH=$HOME/.local/bin/:$PATH \
-    PYTHONUNBUFFERED=1 \
-    PYTHONIOENCODING=UTF-8 \
-    LC_ALL=en_US.UTF-8 \
-    LANG=en_US.UTF-8
+# Install pip & pipenv
+RUN pip install --upgrade --no-cache-dir pip && \
+    pip install --upgrade --no-cache-dir pipenv
 
-# Install Python 3.9
-RUN microdnf update -y && \
-    microdnf install -y python39 && \
-    microdnf -y clean all && rm -rf /var/cache/yum
-
-# Install pipenv and setuptools
-RUN pip3.9 install --no-cache-dir --upgrade pip && \
-    pip3.9 install --no-cache-dir --upgrade pipenv && \
-    pip3.9 install --no-cache-dir 'setuptools>=65.5.1'
-
-# create python venv where everything will be executed
-RUN python -m venv myenv
+# Setup work directory
+WORKDIR /opt/app-root/
 
 # Copy files to workdir
-WORKDIR /opt/app-root/
 COPY ./Pipfile* /opt/app-root/
 COPY ./setup.cfg /opt/app-root/setup.cfg
 
+# Install pipenv
 RUN PIPENV_VENV_IN_PROJECT=1 PIPENV_IGNORE_VIRTUALENVS=1 pipenv install --dev --system --deploy --ignore-pipfile
 
+# Copy files to workdir
 COPY /src /opt/app-root/src
 COPY /tests /opt/app-root/tests
-
-# drop root privilege
-USER 1001

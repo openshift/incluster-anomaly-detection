@@ -23,10 +23,13 @@ RUN pip3.9 install --no-cache-dir --upgrade pip && \
     pip3.9 install --no-cache-dir --upgrade pipenv && \
     pip3.9 install --no-cache-dir 'setuptools>=65.5.1'
 
-# Copy files to workdir
+# Setup work directory
 WORKDIR /opt/app-root/
+
+# Copy files to workdir
 COPY ./Pipfile* /opt/app-root/
 
+# Install pipenv
 RUN PIPENV_VENV_IN_PROJECT=1 PIPENV_IGNORE_VIRTUALENVS=1 pipenv install --system --deploy --ignore-pipfile
 
 COPY src /opt/app-root/src
