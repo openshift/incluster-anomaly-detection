@@ -5,7 +5,7 @@ from datetime import datetime
 
 import daiquiri
 
-from src.common.config import DAIQUIRI_LOG_LEVEL
+from src.common.config import DAIQUIRI_LOG_LEVEL, ANOMALY_CR_CONFIG
 
 daiquiri.setup(level=DAIQUIRI_LOG_LEVEL)
 _logger = daiquiri.getLogger(__name__)
@@ -41,8 +41,8 @@ class AbstractAnomalyDetector(metaclass=ABCMeta):
 
         # Build anomaly object that will be saved to CR in cluster later point
         anomaly_obj = {
-            "apiVersion": "backend.anomaly.io/v1alpha1",
-            "kind": "AnomalyData",
+            "apiVersion": f"{ANOMALY_CR_CONFIG['group']}/{ANOMALY_CR_CONFIG['version']}",
+            "kind": ANOMALY_CR_CONFIG["kind"],
             "metadata": {
                 "label": {"app.kubernetes.io/created-by": "anomaly-engine"},
                 "name": name,
