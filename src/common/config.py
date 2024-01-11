@@ -21,3 +21,12 @@ MIN_NO_OF_DATA_POINTS = int(os.environ.get("MIN_NO_OF_DATA_POINTS", 10))
 # Default parameter for the "min_max" query type
 MIN_VALUE = int(os.environ.get("MIN_VALUE", 100))
 MAX_VALUE = int(os.environ.get("MAX_VALUE", 1000))
+
+# Config to store anomaly data into `AnomalyData` CR
+ANOMALY_CR_CONFIG = {
+    "group": os.environ.get("ANOMALY_CR_GROUP", "observability-analytics.redhat.com"),
+    "version": os.environ.get("ANOMALY_CR_VERSION", "v1alpha1"),
+    "namespace": os.environ.get("ANOMALY_CR_NAMESPACE", "osa-anomaly-detection"),
+    "plural": os.environ.get("ANOMALY_CR_PLURAL", "anomalydata"),
+    "kind": os.environ.get("ANOMALY_CR_kIND", "AnomalyData"),
+}
