@@ -37,7 +37,7 @@ class AbstractAnomalyDetector(metaclass=ABCMeta):
                 name = name + "-" + value
 
         # convert name based on kubernetes data standards.
-        name = name.replace(" ", "-").replace("_", "-")
+        name = name.replace(" ", "-").replace("_", "-").lower()
 
         # Build anomaly object that will be saved to CR in cluster later point
         anomaly_obj = {
