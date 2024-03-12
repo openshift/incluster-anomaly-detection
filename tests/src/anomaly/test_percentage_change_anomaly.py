@@ -38,12 +38,15 @@ class PercentageChangeAnomalyTestCase(TestCase):
 
         # create anomaly detection class object and call detect_anomaly method
         anomaly_detection_obj = PercentageChangeAnomaly(
-            data=data, metric_info={"resource": "configmaps"}, config=self._config
+            data=data, metric_info={"resource": "Configmaps"}, config=self._config
         )
         anomaly = anomaly_detection_obj.detect_anomaly()
 
         # assert results
         self.assertIsNotNone(anomaly)
+
+        self.assertTrue("metadata" in anomaly)
+        self.assertTrue(anomaly["metadata"]["name"].endswith("-etcd-object-configmaps"))
 
         self.assertTrue("spec" in anomaly)
         self.assertEqual(anomaly["spec"]["method"], self._config["method"])
